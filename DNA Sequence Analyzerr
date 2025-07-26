@@ -1,0 +1,242 @@
+# DNA Sequence Analyzer
+# By Gautam Pande
+# This Script analyses a DNA sequence and return: 
+# - Cleaned sequences
+# - Length
+# - GC content
+# - Reverse complement
+# - Transcribed mRNA sequence 
+# - Forward and Reverse Primer
+
+# DNA Sequence Analyzer
+# By Gautam Pandey
+
+# --------------------------
+# Step 1: Get Primer Length!
+# --------------------------
+try:
+    primer_len = int(input("Enter primer length (default 20): ") or "20")
+except ValueError:
+    primer_len = 20
+
+# --------------------------
+# Step 2: Ask for DNA Input
+# --------------------------
+dna_input = input("Enter your DNA sequence: ")
+
+# --------------------------
+# Step 3: Clean Sequence
+# --------------------------
+def clean_sequence(seq):
+    return ''.join([base for base in seq.upper() if base in 'ATGC'])
+
+sequence = clean_sequence(dna_input)
+print("\n✅ Cleaned DNA sequence:", sequence)
+print("📏 Length:", len(sequence))
+
+# --------------------------
+# Step 4: GC Content
+# --------------------------
+def gc_content(seq):
+    g = seq.count('G')
+    c = seq.count('C')
+    return round(((g + c) / len(seq)) * 100, 2)
+
+print("🧪 GC Content:", gc_content(sequence), "%")
+
+# --------------------------
+# Step 5: Reverse Complement
+# --------------------------
+def reverse_complement(seq):
+    complement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+    return ''.join([complement[base] for base in reversed(seq)])
+
+print("🔁 Reverse Complement:", reverse_complement(sequence))
+
+# --------------------------
+# Step 6: Transcription
+# --------------------------
+def transcribe(seq):
+    return seq.replace('T', 'U')
+
+print("💬 Transcribed mRNA:", transcribe(sequence))
+
+# --------------------------
+# Step 7: Translation
+# --------------------------
+def translate_dna(seq):
+    codon_table = {
+        'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
+        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
+        'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
+        'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
+        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
+        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
+        'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
+        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
+        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
+        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
+        'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
+        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
+        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
+        'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
+        'TAC':'Y', 'TAT':'Y', 'TAA':'_', 'TAG':'_', 'TGA':'_'
+    }
+
+    protein = ""
+    for i in range(0, len(seq) - 2, 3):
+        codon = seq[i:i+3]
+        amino_acid = codon_table.get(codon, '?')
+        if amino_acid == '_':  # Stop codon
+            break
+        protein += amino_acid
+    return protein 
+
+print("🧬 Translated Protein Sequence:", translate_dna(sequence))
+
+# --------------------------
+# Step 8: Primer Generator
+# --------------------------
+def get_primers(seq, primer_len=20):
+    if len(seq) < primer_len:
+        return ("Sequence too short", "Sequence too short")
+    forward = seq[:primer_len]
+    reverse = reverse_complement(seq[-primer_len:])
+    return forward, reverse
+
+# --------------------------
+# Step 9: Primer Stats
+# --------------------------
+def primer_stats(primer):
+    gc = gc_content(primer)
+    length = len(primer)
+    a = primer.count('A')
+    t = primer.count('T')
+    g = primer.count('G')
+    c = primer.count('C')
+    tm = 2 * (a + t) + 4 * (g + c)
+
+    quality = "✅ Good"
+    if length < 18 or length > 25:
+        quality = "⚠️ Check Length"
+    if gc < 40 or gc > 60:
+        quality = "⚠️ GC% Out of Range"
+    if tm < 50 or tm > 65:
+        quality = "⚠️ Tm Out of Range"
+
+    return gc, tm, quality
+
+# --------------------------
+# Step 10: Print Primers & Stats
+# --------------------------
+f_primer, r_primer = get_primers(sequence, primer_len)
+
+f_gc, f_tm, f_quality = primer_stats(f_primer)
+r_gc, r_tm, r_quality = primer_stats(r_primer)
+
+print("\n🧪 Forward Primer:", f_primer)
+print("   • GC%:", f_gc, "| Tm:", f_tm, "°C |", f_quality)
+
+print("🧪 Reverse Primer:", r_primer)
+print("   • GC%:", r_gc, "| Tm:", r_tm, "°C |", r_quality)
+
+# --------------------------
+# Step 11: Call BLAST for both primers
+# --------------------------
+import requests
+import time
+
+def blast_primer(primer_seq):
+    print(f"\n🔍 BLASTing primer: {primer_seq}")
+
+    # Step 1: Submit the sequence to NCBI BLAST
+    blast_url = "https://blast.ncbi.nlm.nih.gov/Blast.cgi"
+    params = {
+        "CMD": "Put",
+        "PROGRAM": "blastn",
+        "DATABASE": "nt",
+        "QUERY": primer_seq,
+        "MEGABLAST": "on"
+    }
+
+    print("📡 Submitting BLAST request...")
+    response = requests.post(blast_url, data=params)
+    if "RID =" not in response.text:
+        print("❌ BLAST request failed. Try again later.")
+        return
+
+    rid = response.text.split("RID = ")[1].split("\n")[0].strip()
+    print(f"🆔 Request ID: {rid}")
+
+    # Step 2: Wait and check the result
+    time.sleep(10)  # wait 10 seconds before polling
+
+    for attempt in range(5):  # try polling 5 times
+        print(f"⏳ Checking result... (Attempt {attempt+1})")
+        check_params = {
+            "CMD": "Get",
+            "RID": rid,
+            "FORMAT_TYPE": "Text"
+        }
+        result = requests.get(blast_url, params=check_params)
+        if "No hits found" in result.text or "Sequences producing significant alignments" in result.text:
+            print("\n🧬 BLAST Result:\n")
+            print(result.text[:2000])  # Print only first 2000 characters
+            return
+        time.sleep(5)
+
+    print("❌ BLAST check timed out.")
+
+import requests
+import time
+
+def blast_primer(primer_seq):
+    print(f"\n🔍 BLASTing primer: {primer_seq}")
+
+    # Define headers so NCBI doesn't reject the request
+    headers = {
+        'User-Agent': 'GautamPandey-DNAAnalyzer/1.0 (gautampande01@gmail.com)'
+    }
+
+    # Step 1: Submit the sequence to NCBI BLAST
+    blast_url = "https://blast.ncbi.nlm.nih.gov/Blast.cgi"
+    params = {
+        "CMD": "Put",
+        "PROGRAM": "blastn",
+        "DATABASE": "nt",
+        "QUERY": primer_seq,
+        "MEGABLAST": "on"
+    }
+
+    print("📡 Submitting BLAST request...")
+    response = requests.post(blast_url, data=params, headers=headers)
+
+    if "RID =" not in response.text:
+        print("❌ BLAST request failed. Try again later.")
+        return
+
+    rid = response.text.split("RID = ")[1].split("\n")[0].strip()
+    print(f"🆔 Request ID: {rid}")
+
+    # Step 2: Wait and check the result
+    time.sleep(10)  # wait 10 seconds before polling
+
+    for attempt in range(5):  # try polling 5 times
+        print(f"⏳ Checking result... (Attempt {attempt+1})")
+        check_params = {
+            "CMD": "Get",
+            "RID": rid,
+            "FORMAT_TYPE": "Text"
+        }
+        result = requests.get(blast_url, params=check_params, headers=headers)
+
+        if "No hits found" in result.text or "Sequences producing significant alignments" in result.text:
+            print("\n🧬 BLAST Result:\n")
+            print(result.text[:2000])  # Print only first 2000 characters
+            return
+        time.sleep(5)
+
+    print("❌ BLAST check timed out.")
+
+blast_primer(f_primer)
+blast_primer(r_primer)
