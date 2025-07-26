@@ -7,7 +7,6 @@
 # - Reverse complement
 # - Transcribed mRNA sequence 
 # - Forward and Reverse Primer
-
 # DNA Sequence Analyzer
 # By Gautam Pandey
 
@@ -31,7 +30,7 @@ def clean_sequence(seq):
     return ''.join([base for base in seq.upper() if base in 'ATGC'])
 
 sequence = clean_sequence(dna_input)
-print("\n✅ Cleaned DNA sequence:", sequence)
+print("\n Cleaned DNA sequence:", sequence)
 print("📏 Length:", len(sequence))
 
 # --------------------------
@@ -116,13 +115,13 @@ def primer_stats(primer):
     c = primer.count('C')
     tm = 2 * (a + t) + 4 * (g + c)
 
-    quality = "✅ Good"
+    quality = "Good"
     if length < 18 or length > 25:
-        quality = "⚠️ Check Length"
+        quality = "⚠Check Length"
     if gc < 40 or gc > 60:
-        quality = "⚠️ GC% Out of Range"
+        quality = "⚠GC% Out of Range"
     if tm < 50 or tm > 65:
-        quality = "⚠️ Tm Out of Range"
+        quality = "⚠Tm Out of Range"
 
     return gc, tm, quality
 
@@ -134,10 +133,10 @@ f_primer, r_primer = get_primers(sequence, primer_len)
 f_gc, f_tm, f_quality = primer_stats(f_primer)
 r_gc, r_tm, r_quality = primer_stats(r_primer)
 
-print("\n🧪 Forward Primer:", f_primer)
+print("\n Forward Primer:", f_primer)
 print("   • GC%:", f_gc, "| Tm:", f_tm, "°C |", f_quality)
 
-print("🧪 Reverse Primer:", r_primer)
+print(" Reverse Primer:", r_primer)
 print("   • GC%:", r_gc, "| Tm:", r_tm, "°C |", r_quality)
 
 # --------------------------
@@ -162,11 +161,11 @@ def blast_primer(primer_seq):
     print("📡 Submitting BLAST request...")
     response = requests.post(blast_url, data=params)
     if "RID =" not in response.text:
-        print("❌ BLAST request failed. Try again later.")
+        print(" BLAST request failed. Try again later.")
         return
 
     rid = response.text.split("RID = ")[1].split("\n")[0].strip()
-    print(f"🆔 Request ID: {rid}")
+    print(f" Request ID: {rid}")
 
     # Step 2: Wait and check the result
     time.sleep(10)  # wait 10 seconds before polling
@@ -180,12 +179,12 @@ def blast_primer(primer_seq):
         }
         result = requests.get(blast_url, params=check_params)
         if "No hits found" in result.text or "Sequences producing significant alignments" in result.text:
-            print("\n🧬 BLAST Result:\n")
+            print("\n BLAST Result:\n")
             print(result.text[:2000])  # Print only first 2000 characters
             return
         time.sleep(5)
 
-    print("❌ BLAST check timed out.")
+    print(" BLAST check timed out.")
 
 import requests
 import time
@@ -212,11 +211,11 @@ def blast_primer(primer_seq):
     response = requests.post(blast_url, data=params, headers=headers)
 
     if "RID =" not in response.text:
-        print("❌ BLAST request failed. Try again later.")
+        print(" BLAST request failed. Try again later.")
         return
 
     rid = response.text.split("RID = ")[1].split("\n")[0].strip()
-    print(f"🆔 Request ID: {rid}")
+    print(f" Request ID: {rid}")
 
     # Step 2: Wait and check the result
     time.sleep(10)  # wait 10 seconds before polling
@@ -231,12 +230,12 @@ def blast_primer(primer_seq):
         result = requests.get(blast_url, params=check_params, headers=headers)
 
         if "No hits found" in result.text or "Sequences producing significant alignments" in result.text:
-            print("\n🧬 BLAST Result:\n")
+            print("\n BLAST Result:\n")
             print(result.text[:2000])  # Print only first 2000 characters
             return
         time.sleep(5)
 
-    print("❌ BLAST check timed out.")
+    print(" BLAST check timed out.")
 
 blast_primer(f_primer)
 blast_primer(r_primer)
