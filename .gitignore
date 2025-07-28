@@ -3,4 +3,4 @@ backend/venv/
 __pycache__/
 
 frontend/node_modules/
-.env.development
+frontend/.env.production

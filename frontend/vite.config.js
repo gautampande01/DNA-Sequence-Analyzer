@@ -2,19 +2,36 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    react(), 
-    tailwindcss()
-  ],
-  base: '/DNA-Sequence-Analyzer/',
-  build: {
-    outDir: 'dist',
-  },
-  server: {
-    watch: {
-      usePolling: true
+export default defineConfig(({ mode }) => {
+  const isProduction = mode === 'production'
+  
+  return {
+    plugins: [
+      react(),
+      tailwindcss()
+    ],
+    
+    base: isProduction ? '/DNA-Sequence-Analyzer/' : '/',
+    
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+      sourcemap: false,
+      minify: 'terser'
+    },
+    
+    server: {
+      port: 5173,
+      host: true,
+      open: true,
+      watch: {
+        usePolling: true
+      }
+    },
+    
+    preview: {
+      port: 4173,
+      host: true
     }
   }
-})  
+})
