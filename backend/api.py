@@ -23,7 +23,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://gautampande01.github.io",  
+        "https://gautampande01.github.io/DNA-Sequence-Analyzer/",  
     ],
     allow_credentials=True,
     allow_methods=["*"], 
