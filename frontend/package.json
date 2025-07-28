@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://gautampande01.github.io/dna-analyzer",
+  "homepage": "https://gautampande01.github.io/DNA-Sequence-Analyzer/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
