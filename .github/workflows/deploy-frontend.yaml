@@ -47,7 +47,7 @@ jobs:
         cd frontend
         npm run build
       env:
-        VITE_API_BASE_URL: https://dna-analyzer-api.onrender.com
+        VITE_API_BASE_URL: https://dna-sequence-analyzer.onrender.com
         NODE_ENV: production
     
     - name: Setup GitHub Pages
