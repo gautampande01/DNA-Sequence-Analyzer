@@ -17,4 +17,4 @@ A Python-based bioinformatics project that performs essential DNA sequence analy
 
  Primer Stats – Evaluates GC%, melting temperature (Tm), and quality
 
- NCBI BLAST Integration – (Optional) Checks primer similarity to known genomic sequences
+ NCBI BLAST – Checks primer similarity to known genomic sequences
