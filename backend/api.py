@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
+from datetime import datetime
 from pathlib import Path
 from pydantic import BaseModel, Field, validator
 from typing import Optional
@@ -70,7 +71,8 @@ async def root():
             "mutation": "/mutation - Mutation analysis", 
             "blast": "/blast - BLAST primer sequences",
             "literature": "/literature - Search literature",
-            "orfs": "/orfs - Find Open Reading Frames"
+            "orfs": "/orfs - Find Open Reading Frames",
+            "health": "/health - Ping server for health check"
         },
         "docs": "/docs"
     }
@@ -203,6 +205,10 @@ async def orf_search(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/health")
+async def health():
+    return {"status": "ok", "timestamp": datetime.now()}
 
 
 if __name__ == "__main__":

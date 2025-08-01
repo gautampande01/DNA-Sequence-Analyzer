@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Container,
   Stack,
   Tabs,
   Grid,
   LoadingOverlay,
-  SimpleGrid
+  SimpleGrid,
+  Notification
 } from '@mantine/core'
 import {
   IconMicroscope,
@@ -22,9 +23,29 @@ import MutationForm from './components/forms/MutationForm'
 import { OrfResults, LiteratureResults, BlastResults } from './components/Tools'
 import { useAnalysis } from './hooks/useAnalysis'
 import MutationResults from './components/MutationResults'
+import api, { dnaAnalysisApi } from './services/api'
+import { notifications } from '@mantine/notifications'
+import { IconAlertCircle } from '@tabler/icons-react'
 
 function App() {
   const [activeTab, setActiveTab] = useState('analyze')
+
+  useEffect(() => {
+    const wakeServer = async () => {
+      try {
+        const response = await dnaAnalysisApi.health();
+      } catch (error) {
+        notifications.show({
+          title: 'Server Unreachable',
+          color: 'red',
+          icon: <IconAlertCircle size="1rem" />,
+        })
+      }
+    };
+
+    wakeServer()
+
+  }, [])
   
   const {
     // State

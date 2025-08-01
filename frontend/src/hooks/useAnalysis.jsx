@@ -1,4 +1,3 @@
-// src/hooks/useAnalysis.js
 import { useState } from 'react'
 import { notifications } from '@mantine/notifications'
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react'
